@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
+// import dynamic from "next/dynamic";
+// import { Loader2 } from "lucide-react";
 import { VehicleList } from "@/components/vehicle/vehicle-list";
 import { VehicleDetailPanel } from "@/components/vehicle/vehicle-detail-panel";
 import { NotificationCenter } from "@/components/notification/notification-center";
@@ -21,7 +21,8 @@ import Map from '@/components/map/map';
 
 export default function Dashboard() {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isPanelOpen] = useState(true);
+  // const [isPanelOpen, setIsPanelOpen] = useState(true); // Add an interactive panel and use it
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-background">

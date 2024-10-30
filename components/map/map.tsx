@@ -22,8 +22,8 @@ interface MapProps {
 
 export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
   const { vehicles } = useVehicles();
-  const [map, setMap] = useState<LeafletMap | null>(null); // Correct type
-  const [mapInitialized, setMapInitialized] = useState(false);
+  // const [map, setMap] = useState<LeafletMap | null>(null);
+  const [map] = useState<LeafletMap | null>(null);
 
   // Center map on selected vehicle
   useEffect(() => {
