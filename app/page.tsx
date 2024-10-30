@@ -7,7 +7,6 @@ import { VehicleList } from "@/components/vehicle/vehicle-list";
 import { VehicleDetailPanel } from "@/components/vehicle/vehicle-detail-panel";
 import { NotificationCenter } from "@/components/notification/notification-center";
 import Header from "@/components/layout/header";
-import VehicleMap from '@/components/map/VehicleMap';
 import Map from '@/components/map/map';
 
 // Dynamically import the map component to prevent SSR issues
