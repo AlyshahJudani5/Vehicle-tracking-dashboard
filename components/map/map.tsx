@@ -27,7 +27,7 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
 
   // Center map on selected vehicle
   useEffect(() => {
-    console.log(map, selectedVehicleId)
+    // console.log(map, selectedVehicleId)
     if (map && selectedVehicleId) {
       const vehicle = vehicles.find((v) => v.id === selectedVehicleId);
       if (vehicle) {
@@ -38,7 +38,8 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
 
   return (
     <MapContainer
-      center={[51.505, -0.09]}
+      center={[47.2419412051282, -122.46377656410257]}
+      // center={[47.39, -1.25]}
       zoom={13}
       className={cn("h-full w-full")}
     >
@@ -56,8 +57,10 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
           }}
         >
           <Popup offset={[0, -20]}>
-            <div className="p-2">
+            <div className="p-0">
               <h3 className="font-semibold">{vehicle.id}</h3>
+              <p>Make: {vehicle.make}</p>
+              <p>Model: {vehicle.model}</p>
               <p>Speed: {vehicle.speed} km/h</p>
               <p>Status: {vehicle.status}</p>
             </div>
