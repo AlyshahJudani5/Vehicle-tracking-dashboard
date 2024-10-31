@@ -8,21 +8,28 @@ import {
   Clock,
   MapPin,
   Truck,
+  // CircleX,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface VehicleListProps {
   onVehicleSelect: (id: string) => void;
   selectedVehicleId: string | null;
+  closePanel: (action: boolean) => void;
 }
 
-export function VehicleList({ onVehicleSelect, selectedVehicleId }: VehicleListProps) {
+export function VehicleList({ onVehicleSelect, selectedVehicleId, closePanel }: VehicleListProps) {
   const { vehicles } = useVehicles();
 
   return (
     <ScrollArea className="h-[calc(100vh-3.5rem)]">
       <div className="p-4">
-        <h2 className="mb-4 text-lg font-semibold">Vehicles Overview</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="mb-4 text-lg font-semibold">Vehicles Overview</h2>
+          {/* <button onClick={() => closePanel(false)}>
+            <CircleX className="h-6 w-6" />
+          </button> */}
+        </div>
         <div className="space-y-2">
           {vehicles.map((vehicle) => (
             <button

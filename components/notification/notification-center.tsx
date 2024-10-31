@@ -13,7 +13,7 @@ export function NotificationCenter() {
     <>
       <div
         className={cn(
-          "absolute right-0 top-14 z-50 h-[calc(100vh-3.5rem)] w-80 transform border-l bg-background transition-transform duration-300",
+          "absolute right-0 top-14 z-50 h-[calc(100vh-3.5rem)] w-80 transform border-l border-t rounded-t-md bg-background transition-transform duration-300 shadow-lg",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
