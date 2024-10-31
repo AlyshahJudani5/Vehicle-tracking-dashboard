@@ -1,11 +1,23 @@
 "use client"
 
 import { useState } from "react";
+// import dynamic from "next/dynamic";
+// import { Loader2 } from "lucide-react";
 import { VehicleList } from "@/components/vehicle/vehicle-list";
 import { VehicleDetailPanel } from "@/components/vehicle/vehicle-detail-panel";
 import { NotificationCenter } from "@/components/notification/notification-center";
 import Header from "@/components/layout/header";
 import Map from '@/components/map/map';
+
+// Dynamically import the map component to prevent SSR issues
+// const Map = dynamic(() => import("@/components/map/map"), {
+//   loading: () => (
+//     <div className="flex h-full items-center justify-center">
+//       <Loader2 className="h-8 w-8 animate-spin text-primary" />
+//     </div>
+//   ),
+//   ssr: false,
+// });
 
 export default function Dashboard() {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
