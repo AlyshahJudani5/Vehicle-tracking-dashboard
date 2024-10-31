@@ -43,7 +43,6 @@ export default function Dashboard() {
             <VehicleList
               onVehicleSelect={setSelectedVehicleId}
               selectedVehicleId={selectedVehicleId}
-              closePanel={setIsPanelOpen}
             />
             {selectedVehicleId && (
               <VehicleDetailPanel
