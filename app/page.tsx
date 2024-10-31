@@ -21,7 +21,8 @@ import Map from '@/components/map/map';
 
 export default function Dashboard() {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(true); // Add an interactive panel and use it
+  const [isPanelOpen] = useState(true); // Add an interactive panel and use it
+  // const [isPanelOpen, setIsPanelOpen] = useState(true); // Add an interactive panel and use it
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-background">
