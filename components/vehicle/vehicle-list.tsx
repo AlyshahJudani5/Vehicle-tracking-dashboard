@@ -3,12 +3,10 @@
 import { useVehicles } from "@/hooks/use-vehicles";
 import { cn } from "@/lib/utils";
 import {
-  Battery,
   Circle,
   Clock,
   MapPin,
   Truck,
-  // CircleX,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -25,43 +23,42 @@ export function VehicleList({ onVehicleSelect, selectedVehicleId }: VehicleListP
       <div className="p-4">
         <h2 className="mb-4 text-lg font-semibold">Vehicles Overview</h2>
         <div className="space-y-2">
-          {vehicles.map((vehicle) => (
-            <button
-              key={vehicle.id}
-              onClick={() => onVehicleSelect(vehicle.id)}
-              className={cn(
-                "w-full rounded-lg border p-4 text-left transition-colors hover:bg-accent",
-                selectedVehicleId === vehicle.id && "border-primary bg-accent"
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Truck className="h-5 w-5" />
-                  <div>
-                    <h3 className="font-medium">{vehicle.id}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {vehicle.make} {vehicle.model}
-                    </p>
+          {vehicles.map((vehicle) => {
+            // Get the latest location update for each vehicle
+            const latestUpdate = vehicle.locationUpdates[vehicle.locationUpdates.length - 1];
+            
+            return (
+              <button
+                key={vehicle.vehicleNumber}
+                onClick={() => onVehicleSelect(vehicle.vehicleNumber)}
+                className={cn(
+                  "w-full rounded-lg border p-4 text-left transition-colors hover:bg-accent",
+                  selectedVehicleId === vehicle.vehicleNumber && "border-primary bg-accent"
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Truck className="h-5 w-5" />
+                    <div>
+                      <h3 className="font-medium">{vehicle.vehicleNumber}</h3>
+                    </div>
                   </div>
                 </div>
-                <StatusIndicator status={vehicle.status} />
-              </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{vehicle.location}</span>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                  {/* Display the latest area */}
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>{latestUpdate?.area}</span>
+                  </div>
+                  {/* Display the latest time */}
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span>{latestUpdate?.time}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Battery className="h-4 w-4" />
-                  <span>{vehicle.battery}%</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{vehicle.lastUpdate}</span>
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
     </ScrollArea>

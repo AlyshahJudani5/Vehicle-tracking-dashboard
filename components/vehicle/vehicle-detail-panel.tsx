@@ -28,6 +28,9 @@ export function VehicleDetailPanel({
 
   if (!vehicle) return null;
 
+  // Get the most recent location update (assuming the latest entry is the most recent update)
+  const latestLocation = vehicle.locationUpdates[vehicle.locationUpdates.length - 1];
+
   return (
     <div className="absolute inset-y-0 right-0 w-96 border-l bg-background">
       <div className="flex h-14 items-center justify-between border-b px-4">
@@ -48,32 +51,19 @@ export function VehicleDetailPanel({
             <div className="mb-4 flex items-center gap-3">
               <Truck className="h-8 w-8" />
               <div>
-                <h3 className="font-medium">{vehicle.id}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {vehicle.make} {vehicle.model}
-                </p>
+                <h3 className="font-medium">{vehicle.vehicleNumber}</h3>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <InfoCard
                 icon={<MapPin className="h-4 w-4" />}
                 label="Location"
-                value={vehicle.location}
+                value={latestLocation.area}
               />
               <InfoCard
-                icon={<Navigation className="h-4 w-4" />}
-                label="Speed"
-                value={`${vehicle.speed} km/h`}
-              />
-              <InfoCard
-                icon={<Battery className="h-4 w-4" />}
-                label="Battery"
-                value={`${vehicle.battery}%`}
-              />
-              <InfoCard
-                icon={<Power className="h-4 w-4" />}
-                label="Status"
-                value={vehicle.status}
+                icon={<Clock className="h-4 w-4" />}
+                label="Last Update"
+                value={`${latestLocation.time} on ${latestLocation.date}`}
               />
             </div>
           </div>
@@ -84,14 +74,13 @@ export function VehicleDetailPanel({
           <div>
             <h3 className="mb-4 font-medium">Recent Activity</h3>
             <div className="space-y-4">
-              {vehicle.timeline.map((event, index) => (
+              {vehicle.locationUpdates.map((event, index) => (
                 <div key={index} className="flex gap-3">
                   <Clock className="h-4 w-4 shrink-0" />
                   <div>
-                    <p className="text-sm">{event.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {event.timestamp}
-                    </p>
+                    <p className="text-sm">{event.area}</p>
+                    <p className="text-xs text-muted-foreground">{event.date}</p>
+                    <p className="text-xs text-muted-foreground">{event.time}</p>
                   </div>
                 </div>
               ))}

@@ -2,55 +2,26 @@
 
 import { useState, useEffect } from "react";
 
-interface TimelineEvent {
-  description: string;
-  timestamp: string;
-}
+import { Vehicle, mockVehicles as vehicles } from "@/vehicleData/data3"
 
-interface Vehicle {
-  id: string;
-  make: string;
-  model: string;
-  status: string;
-  location: string;
-  speed: number;
-  battery: number;
-  timeline: TimelineEvent[];
-}
-
-export function useVehicle(id: string) {
+export function useVehicle(vehicleNumber: string) {
+  // Custom hook to fetch data for a single vehicle
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
 
   useEffect(() => {
-    // Simulate API call - in a real app, this would fetch from a backend
-    setVehicle({
-      id,
-      make: "Tesla",
-      model: "Model 3",
-      status: "active",
-      location: "Downtown",
-      speed: 45,
-      battery: 78,
-      timeline: [
-        {
-          description: "Started route to Downtown",
-          timestamp: "10:30 AM",
-        },
-        {
-          description: "Completed delivery at Store #123",
-          timestamp: "10:45 AM",
-        },
-        {
-          description: "Battery level below 80%",
-          timestamp: "11:00 AM",
-        },
-        {
-          description: "Entering high-traffic area",
-          timestamp: "11:15 AM",
-        },
-      ],
-    });
-  }, [id]);
+    // Find the vehicle in imported data3.ts by vehicleNumber
+    const foundVehicle = vehicles.find(
+      (v: Vehicle) => v.vehicleNumber === vehicleNumber
+    );
+
+    // Set the found vehicle in state if it exists
+    if (foundVehicle) {
+      setVehicle(foundVehicle);
+    } else {
+      console.warn(`Vehicle with number ${vehicleNumber} not found.`);
+      setVehicle(null); // Handle case where vehicle is not found
+    }
+  }, [vehicleNumber]);
 
   return { vehicle };
 }
