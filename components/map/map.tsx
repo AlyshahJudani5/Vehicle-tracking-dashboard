@@ -38,7 +38,7 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
 
   return (
     <MapContainer
-      center={[24.8607, 67.0011]}
+      center={[24.8007, 67.0711]}
       zoom={13}
       className={cn("h-full w-full")}
     >

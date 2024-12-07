@@ -23,7 +23,11 @@ export function useVehicles() {
             time: latestUpdate.time,
             latitude: newLatitude,
             longitude: newLongitude,
-            area: latestUpdate.area // Or update the area if needed
+            area: latestUpdate.area,
+            ignition: latestUpdate.ignition,
+            speed: latestUpdate.speed,
+            status: latestUpdate.status,
+            distance: latestUpdate.distance, // Or update the area if needed
           };
 
           // Add the new update to the locationUpdates array
