@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Vehicle, LocationUpdate, mockVehicles } from "@/vehicleData/data3"
+import { Vehicle, LocationUpdate, mockVehicles } from "@/vehicleData/data"
 
 export function useVehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles.slice(0, 50));

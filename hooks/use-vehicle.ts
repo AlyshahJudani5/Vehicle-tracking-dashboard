@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { Vehicle, mockVehicles as vehicles } from "@/vehicleData/data3"
+import { Vehicle, mockVehicles as vehicles } from "@/vehicleData/data"
 
 export function useVehicle(vehicleNumber: string) {
   // Custom hook to fetch data for a single vehicle
