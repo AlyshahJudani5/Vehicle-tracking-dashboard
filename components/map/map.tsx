@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import { Map as LeafletMap } from "leaflet"; // Ensure this is imported for type
 import L, { Marker as LeafletMarker } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Icon } from "leaflet";
+// import { Icon } from "leaflet";
 import { useVehicles } from "@/hooks/use-vehicles";
-import { Car, Bike } from 'lucide-react'; // Import Lucide React's car icon
+import { Car, Bike, Dot } from 'lucide-react'; // Import Lucide React's car icon
 import ReactDOMServer from 'react-dom/server'; // To render React components as static HTML
 
 // // Custom marker icon
@@ -41,18 +41,65 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
   const [map, setMap] = useState<LeafletMap | null>(null);
   const markersRef = useRef<MarkerRef>({}); // Typed ref for markers
 
+  const [selectedVehicleJourney, setSelectedVehicleJourney] = useState<any[]>([]);
+
+  const startingPointIcon = createIconFromComponent(<Dot size={50} color="black" />); // Use the size and color you want
+
+    // Helper function to parse "12:09 AM" format into a Date object
+    const parseTime = (timeStr: string): Date => {
+      const [time, period] = timeStr.split(' '); // Split into time and AM/PM
+      const [hours, minutes] = time.split(':').map(Number); // Split into hours and minutes
+      
+      // Convert 12 AM and 12 PM to 0 and 12 hours respectively
+      let hour = hours;
+      if (period === "AM" && hour === 12) hour = 0; // 12 AM is 00:00
+      if (period === "PM" && hour !== 12) hour += 12; // Convert PM hours to 24-hour format
+  
+      const now = new Date();
+      now.setHours(hour, minutes, 0, 0); // Set the time of the current date
+      return now;
+    };
+  
+    // Function to filter location updates from the last hour
+    const filterUpdatesByLastHour = (updates: any[]) => {
+      const oneHourAgo = new Date().getTime() - 60 * 60 * 1000; // Get the time for 1 hour ago
+      return updates.filter(update => {
+        const updateTime = parseTime(update.time).getTime(); // Convert the time string to Date object
+        return updateTime >= oneHourAgo;
+      });
+    };
+
   // Center map on selected vehicle
   useEffect(() => {
     if (map && selectedVehicleId) {
       const vehicle = vehicles.find((v) => v.vehicleNumber === selectedVehicleId);
       if (vehicle) {
-        // Get the latest location update for the selected vehicle
-        const latestUpdate = vehicle.locationUpdates[vehicle.locationUpdates.length - 1];
-        map.setView([latestUpdate.latitude, latestUpdate.longitude], 15);
+        // // Get the latest location update for the selected vehicle
+        // const latestUpdate = vehicle.locationUpdates[vehicle.locationUpdates.length - 1];
+        // map.setView([latestUpdate.latitude, latestUpdate.longitude], 15);
 
-        // Open the popup for the selected vehicle
-        const marker = markersRef.current[selectedVehicleId];
-        if (marker) marker.openPopup();
+        // // Open the popup for the selected vehicle
+        // const marker = markersRef.current[selectedVehicleId];
+        // if (marker) marker.openPopup();
+
+         // Filter location updates to only include the last hour
+         const recentUpdates = filterUpdatesByLastHour(vehicle.locationUpdates);
+        //  console.log(recentUpdates)
+         
+         // Get all location updates for the selected vehicle
+         const journey = recentUpdates.map(update => [update.latitude, update.longitude]);
+        //  console.log(journey)
+         setSelectedVehicleJourney(journey);
+ 
+         // Center map on the first point of the journey (if available)
+         const firstUpdate = recentUpdates[0];
+         if (firstUpdate) {
+           map.setView([firstUpdate.latitude, firstUpdate.longitude], 15);
+         }
+ 
+         // Open the popup for the selected vehicle
+         const marker = markersRef.current[selectedVehicleId];
+         if (marker) marker.openPopup();
       }
     }
   }, [selectedVehicleId, vehicles, map]);
@@ -70,23 +117,26 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {vehicles.map((vehicle) => {
+        // Filter the vehicle's updates for the last hour
+        const recentUpdates = filterUpdatesByLastHour(vehicle.locationUpdates);
+
         // Get the latest location update for each vehicle
-        const latestUpdate = vehicle.locationUpdates[vehicle.locationUpdates.length - 1];
+        const latestUpdate = recentUpdates[recentUpdates.length - 1];
 
         // Create a Lucide Car icon for the vehicle
         const vehicleIcon = createIconFromComponent(<Car size={30} color="blue" />); // Use the size and color you want
-
+        
         return (
           <Marker
-            key={vehicle.vehicleNumber}
-            position={[latestUpdate.latitude, latestUpdate.longitude]}
-            icon={vehicleIcon}
-            ref={(marker) => {
-              if (marker) markersRef.current[vehicle.vehicleNumber] = marker;
-            }}
-            eventHandlers={{
-              click: () => onVehicleSelect(vehicle.vehicleNumber),
-            }}
+          key={vehicle.vehicleNumber}
+          position={[latestUpdate.latitude, latestUpdate.longitude]}
+          icon={vehicleIcon}
+          ref={(marker) => {
+            if (marker) markersRef.current[vehicle.vehicleNumber] = marker;
+          }}
+          eventHandlers={{
+            click: () => onVehicleSelect(vehicle.vehicleNumber),
+          }}
           >
             <Popup offset={[0, -20]}>
               <div className="p-0">
@@ -99,6 +149,30 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
           </Marker>
         );
       })}
+
+      {/* Plot the selected vehicle's journey if it exists */}
+      {selectedVehicleJourney.length > 0 && (
+        <>
+          <Polyline
+            positions={selectedVehicleJourney}
+            color="blue"
+            weight={4}
+            opacity={0.7}
+          />
+          {/* Add starting point marker */}
+          <Marker
+            position={selectedVehicleJourney[0]} // First point in the journey
+            icon={startingPointIcon} // Use the custom icon for the starting point
+          >
+            <Popup offset={[0, -20]}>
+              <div className="p-0">
+                <h3 className="font-semibold">Starting Point</h3>
+                <p>Journey Start</p>
+              </div>
+            </Popup>
+          </Marker>
+        </>
+      )}
     </MapContainer>
   );
 }
