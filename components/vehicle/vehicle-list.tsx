@@ -6,7 +6,7 @@ import {
   Circle,
   Clock,
   MapPin,
-  Truck,
+  Car,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -38,7 +38,7 @@ export function VehicleList({ onVehicleSelect, selectedVehicleId }: VehicleListP
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Truck className="h-5 w-5" />
+                    <Car className="h-5 w-5" />
                     <div>
                       <h3 className="font-medium">{vehicle.vehicleNumber}</h3>
                     </div>

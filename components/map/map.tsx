@@ -7,13 +7,24 @@ import L, { Marker as LeafletMarker } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import { useVehicles } from "@/hooks/use-vehicles";
+import { Car, Bike } from 'lucide-react'; // Import Lucide React's car icon
+import ReactDOMServer from 'react-dom/server'; // To render React components as static HTML
 
-// Custom marker icon
-const vehicleIcon = new Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+// // Custom marker icon
+// const vehicleIcon = new Icon({
+//   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+//   iconSize: [25, 41],
+//   iconAnchor: [12, 41],
+// });
+
+// Function to convert a React component into static HTML
+const createIconFromComponent = (component: JSX.Element) => {
+  return new L.Icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(ReactDOMServer.renderToStaticMarkup(component)),  // Convert the component to base64 encoded SVG
+    iconSize: [30, 30], // Adjust the size of the icon
+    iconAnchor: [15, 30], // Adjust the anchor point for proper alignment
+  });
+};
 
 interface MapProps {
   onVehicleSelect: (id: string) => void;
@@ -61,6 +72,9 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
       {vehicles.map((vehicle) => {
         // Get the latest location update for each vehicle
         const latestUpdate = vehicle.locationUpdates[vehicle.locationUpdates.length - 1];
+
+        // Create a Lucide Car icon for the vehicle
+        const vehicleIcon = createIconFromComponent(<Car size={30} color="blue" />); // Use the size and color you want
 
         return (
           <Marker

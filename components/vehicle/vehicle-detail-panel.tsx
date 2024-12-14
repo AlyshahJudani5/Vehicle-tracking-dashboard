@@ -11,7 +11,7 @@ import {
   MoreVertical,
   Navigation,
   Power,
-  Truck,
+  Car,
   X,
 } from "lucide-react";
 
@@ -49,7 +49,7 @@ export function VehicleDetailPanel({
           {/* Vehicle Info */}
           <div>
             <div className="mb-4 flex items-center gap-3">
-              <Truck className="h-8 w-8" />
+              <Car className="h-8 w-8" />
               <div>
                 <h3 className="font-medium">{vehicle.vehicleNumber}</h3>
               </div>
