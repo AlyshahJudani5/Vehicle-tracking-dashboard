@@ -8,6 +8,7 @@ import { VehicleDetailPanel } from "@/components/vehicle/vehicle-detail-panel";
 import { NotificationCenter } from "@/components/notification/notification-center";
 import Header from "@/components/layout/header";
 import Map from '@/components/map/map';
+import { useVehicles } from "@/hooks/use-vehicles";
 
 // Dynamically import the map component to prevent SSR issues
 // const Map = dynamic(() => import("@/components/map/map"), {
@@ -20,13 +21,23 @@ import Map from '@/components/map/map';
 // });
 
 export default function Dashboard() {
+  const { vehicles } = useVehicles();
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [isPanelOpen] = useState(true); // Add an interactive panel and use it
   // const [isPanelOpen, setIsPanelOpen] = useState(true); // Add an interactive panel and use it
 
+  const handleSearch = (vehicleNumber: string) => {
+    const vehicleExists = vehicles.some((v) => v.vehicleNumber === vehicleNumber);
+    if (vehicleExists) {
+      setSelectedVehicleId(vehicleNumber);
+    } else {
+      alert("Vehicle not found!");
+    }
+  };
+
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-background">
-      <Header />
+      <Header onSearch={handleSearch}  />
 
       <div className="relative flex flex-1 overflow-hidden">
         {/* Main Map  */}

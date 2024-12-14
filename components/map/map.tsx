@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Map as LeafletMap } from "leaflet"; // Ensure this is imported for type
+import L, { Marker as LeafletMarker } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import { useVehicles } from "@/hooks/use-vehicles";
-import { cn } from "@/lib/utils";
 
 // Custom marker icon
 const vehicleIcon = new Icon({
@@ -20,9 +20,15 @@ interface MapProps {
   selectedVehicleId: string | null;
 }
 
+// Define the type for the ref
+type MarkerRef = {
+  [key: string]: LeafletMarker; // Vehicle numbers as keys, Leaflet markers as values
+};
+
 export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
   const { vehicles } = useVehicles();
-  const [map] = useState<LeafletMap | null>(null);
+  const [map, setMap] = useState<LeafletMap | null>(null);
+  const markersRef = useRef<MarkerRef>({}); // Typed ref for markers
 
   // Center map on selected vehicle
   useEffect(() => {
@@ -32,6 +38,10 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
         // Get the latest location update for the selected vehicle
         const latestUpdate = vehicle.locationUpdates[vehicle.locationUpdates.length - 1];
         map.setView([latestUpdate.latitude, latestUpdate.longitude], 15);
+
+        // Open the popup for the selected vehicle
+        const marker = markersRef.current[selectedVehicleId];
+        if (marker) marker.openPopup();
       }
     }
   }, [selectedVehicleId, vehicles, map]);
@@ -40,7 +50,9 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
     <MapContainer
       center={[24.8007, 67.0711]}
       zoom={13}
-      className={cn("h-full w-full")}
+      className="h-full w-full"
+      // @ts-ignore
+      whenReady={(event: L.LeafletEvent) => setMap(event.target as L.Map)}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -55,6 +67,9 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
             key={vehicle.vehicleNumber}
             position={[latestUpdate.latitude, latestUpdate.longitude]}
             icon={vehicleIcon}
+            ref={(marker) => {
+              if (marker) markersRef.current[vehicle.vehicleNumber] = marker;
+            }}
             eventHandlers={{
               click: () => onVehicleSelect(vehicle.vehicleNumber),
             }}
