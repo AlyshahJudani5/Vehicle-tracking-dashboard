@@ -9,6 +9,7 @@ import "leaflet/dist/leaflet.css";
 import { useVehicles } from "@/hooks/use-vehicles";
 import { Car, Bike, Dot } from 'lucide-react'; // Import Lucide React's car icon
 import ReactDOMServer from 'react-dom/server'; // To render React components as static HTML
+import { Vehicle, LocationUpdate } from "@/vehicleData/data";
 
 // // Custom marker icon
 // const vehicleIcon = new Icon({
@@ -45,29 +46,63 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
 
   const startingPointIcon = createIconFromComponent(<Dot size={50} color="black" />); // Use the size and color you want
 
-    // Helper function to parse "12:09 AM" format into a Date object
-    const parseTime = (timeStr: string): Date => {
-      const [time, period] = timeStr.split(' '); // Split into time and AM/PM
-      const [hours, minutes] = time.split(':').map(Number); // Split into hours and minutes
-      
-      // Convert 12 AM and 12 PM to 0 and 12 hours respectively
-      let hour = hours;
-      if (period === "AM" && hour === 12) hour = 0; // 12 AM is 00:00
-      if (period === "PM" && hour !== 12) hour += 12; // Convert PM hours to 24-hour format
+  function getLocationUpdatesLastHour(vehicle: Vehicle) {
+    // Convert all location updates to date objects
+    const updatesWithDate = vehicle.locationUpdates.map(update => {
+      // Parse and reformat the date to YYYY-MM-DD
+        const [day, month, year] = update.date.split("/");
+        const formattedDate = `${year}-${month}-${day}`;
+
+        // Handle the time parsing using a reliable library or manually
+        const timeParts:any = update.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (!timeParts) {
+          throw new Error("Invalid time format");
+        }
+
+        let [_, hours, minutes, period] = timeParts;
+        hours = parseInt(hours, 10);
+        minutes = parseInt(minutes, 10);
+
+        if (period.toUpperCase() === "PM" && hours !== 12) {
+          hours += 12;
+        } else if (period.toUpperCase() === "AM" && hours === 12) {
+          hours = 0;
+        }
+
+        const formattedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
+
+        // Combine date and time into an ISO string
+        const formattedDateTime = `${formattedDate}T${formattedTime}`;
+        const date = new Date(formattedDateTime);
+      //   console.log(date)
+        return { ...update, dateObject: date };
+    });
   
-      const now = new Date();
-      now.setHours(hour, minutes, 0, 0); // Set the time of the current date
-      return now;
-    };
+    // Find the latest location update
+    const latestUpdate = updatesWithDate.reduce((latest, current) => {
+      return current.dateObject > latest.dateObject ? current : latest;
+    });
   
-    // Function to filter location updates from the last hour
-    const filterUpdatesByLastHour = (updates: any[]) => {
-      const oneHourAgo = new Date().getTime() - 60 * 60 * 1000; // Get the time for 1 hour ago
-      return updates.filter(update => {
-        const updateTime = parseTime(update.time).getTime(); // Convert the time string to Date object
-        return updateTime >= oneHourAgo;
-      });
-    };
+    // Calculate the time difference (1 hour = 60 minutes)
+    const oneHourBefore = new Date(latestUpdate.dateObject.getTime() - (30 * 60 * 1000));
+  
+    // Filter location updates within the last hour
+    const updatesLastHour = updatesWithDate.filter(update => update.dateObject >= oneHourBefore);
+  
+    // Return the filtered location updates
+    return updatesLastHour.map(update => ({
+      date: update.date,
+      time: update.time,
+      latitude: update.latitude,
+      longitude: update.longitude,
+      area: update.area,
+      ignition: update.ignition,
+      speed: update.speed,
+      status: update.status,
+      distance: update.distance
+    }));
+  }
+  
 
   // Center map on selected vehicle
   useEffect(() => {
@@ -83,7 +118,7 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
         // if (marker) marker.openPopup();
 
          // Filter location updates to only include the last hour
-         const recentUpdates = filterUpdatesByLastHour(vehicle.locationUpdates);
+         const recentUpdates = getLocationUpdatesLastHour(vehicle);
         //  console.log(recentUpdates)
          
          // Get all location updates for the selected vehicle
@@ -118,7 +153,10 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
       />
       {vehicles.map((vehicle) => {
         // Filter the vehicle's updates for the last hour
-        const recentUpdates = filterUpdatesByLastHour(vehicle.locationUpdates);
+        const recentUpdates = getLocationUpdatesLastHour(vehicle);
+
+        // Ensure recentUpdates is not empty before proceeding
+        if (recentUpdates.length === 0) return null;
 
         // Get the latest location update for each vehicle
         const latestUpdate = recentUpdates[recentUpdates.length - 1];
@@ -128,15 +166,15 @@ export default function Map({ onVehicleSelect, selectedVehicleId }: MapProps) {
         
         return (
           <Marker
-          key={vehicle.vehicleNumber}
-          position={[latestUpdate.latitude, latestUpdate.longitude]}
-          icon={vehicleIcon}
-          ref={(marker) => {
-            if (marker) markersRef.current[vehicle.vehicleNumber] = marker;
-          }}
-          eventHandlers={{
-            click: () => onVehicleSelect(vehicle.vehicleNumber),
-          }}
+            key={vehicle.vehicleNumber}
+            position={[latestUpdate.latitude, latestUpdate.longitude]}
+            icon={vehicleIcon}
+            ref={(marker) => {
+              if (marker) markersRef.current[vehicle.vehicleNumber] = marker;
+            }}
+            eventHandlers={{
+              click: () => onVehicleSelect(vehicle.vehicleNumber),
+            }}
           >
             <Popup offset={[0, -20]}>
               <div className="p-0">
